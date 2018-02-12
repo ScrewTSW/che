@@ -24,6 +24,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
 
@@ -59,13 +60,16 @@ public class MachineTokenRegistry {
       SubjectImpl withoutToken =
           new SubjectImpl(subject.getUserName(), subject.getUserId(), null, subject.isTemporary());
       final String machineToken =
-              Jwts.builder()
-                  .setPayload(GSON.toJson(withoutToken))
-                  .setHeader(new HashMap<String, Object>(){{
-                    put("kind", "machine");
-                  }})
-                  .signWith(RS512, keyPair.getPrivate())
-                  .compact();
+          Jwts.builder()
+              .setPayload(GSON.toJson(withoutToken))
+              .setHeader(
+                  new HashMap<String, Object>() {
+                    {
+                      put("kind", "machine");
+                    }
+                  })
+              .signWith(RS512, keyPair.getPrivate())
+              .compact();
       tokens.put(workspaceId, userId, machineToken);
       return machineToken;
     } finally {
@@ -88,7 +92,7 @@ public class MachineTokenRegistry {
       String token = wsRow.get(userId);
 
       if (token == null) {
-        token = generateToken("machine", 128);
+        token = NameGenerator.generate("machine", 128);
         tokens.put(workspaceId, userId, token);
       }
       return token;
