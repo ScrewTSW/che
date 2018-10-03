@@ -22,6 +22,15 @@
     <artifactId>che-selenium-core</artifactId>
     <packaging>jar</packaging>
     <name>Che Selenium :: Core</name>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.pojosontheweb</groupId>
+                <artifactId>monte-repack</artifactId>
+                <version>1.0.1</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>com.google.code.gson</groupId>
@@ -38,6 +47,10 @@
         <dependency>
             <groupId>com.google.inject.extensions</groupId>
             <artifactId>guice-assistedinject</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.pojosontheweb</groupId>
+            <artifactId>monte-repack</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>

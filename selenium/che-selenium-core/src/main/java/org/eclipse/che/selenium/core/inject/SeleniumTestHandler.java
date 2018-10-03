@@ -14,13 +14,28 @@ package org.eclipse.che.selenium.core.inject;
 import static com.google.inject.Guice.createInjector;
 import static java.lang.Runtime.getRuntime;
 import static java.lang.String.format;
+import static org.monte.media.FormatKeys.EncodingKey;
+import static org.monte.media.FormatKeys.FrameRateKey;
+import static org.monte.media.FormatKeys.KeyFrameIntervalKey;
+import static org.monte.media.FormatKeys.MIME_AVI;
+import static org.monte.media.FormatKeys.MediaTypeKey;
+import static org.monte.media.FormatKeys.MimeTypeKey;
+import static org.monte.media.VideoFormatKeys.CompressorNameKey;
+import static org.monte.media.VideoFormatKeys.DepthKey;
+import static org.monte.media.VideoFormatKeys.ENCODING_AVI_TECHSMITH_SCREEN_CAPTURE;
+import static org.monte.media.VideoFormatKeys.QualityKey;
 
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.name.Named;
+import java.awt.AWTException;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
@@ -32,6 +47,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +55,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import javax.annotation.PreDestroy;
 import javax.validation.constraints.NotNull;
@@ -58,6 +75,10 @@ import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceLogsReader;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
+import org.monte.media.Format;
+import org.monte.media.FormatKeys.MediaType;
+import org.monte.media.math.Rational;
+import org.monte.screenrecorder.ScreenRecorder;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
@@ -100,6 +121,17 @@ public abstract class SeleniumTestHandler
 
   private static final Logger LOG = LoggerFactory.getLogger(SeleniumTestHandler.class);
   private static final AtomicBoolean isCleanUpCompleted = new AtomicBoolean();
+  private static final Integer SCREENCAP_DEPTH = 24;
+  private static final Rational SCREENCAP_FRAMERATE = Rational.valueOf(29.98);
+  private static final Float SCREENCAP_QUALITY = 1.0f;
+  private static final Integer SCREENCAP_KEYFRAME_INTERVAL = (15 * 60);
+  private static final ArrayList<GraphicsDevice> SCREENCAP_SCREENS =
+      new ArrayList<>(
+          Arrays.asList(GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()));
+  private static final GraphicsConfiguration SCREENCAP_GRAPHICS_CONFIGURATION =
+      SCREENCAP_SCREENS.get(0).getDefaultConfiguration();
+
+  private static ScreenRecorder screenRecorder;
 
   @Inject private SeleniumWebDriverFactory seleniumWebDriverFactory;
 
@@ -157,6 +189,8 @@ public abstract class SeleniumTestHandler
 
     revokeGithubOauthToken();
     checkWebDriverSessionCreation();
+
+    initializeMonteScreenRecorder();
   }
 
   private void revokeGithubOauthToken() {
@@ -179,7 +213,15 @@ public abstract class SeleniumTestHandler
         seleniumTestStatistics.hitStart(),
         getStartingTestLabel(result.getMethod()),
         seleniumTestStatistics.toString());
-
+    try {
+      screenRecorder.start();
+    } catch (IOException e) {
+      LOG.error(
+          "Capture for test #{} {}. {} could not be started.",
+          seleniumTestStatistics.hitStart(),
+          getStartingTestLabel(result.getMethod()),
+          seleniumTestStatistics.toString());
+    }
     skipTestIfNeeded(result);
   }
 
@@ -330,6 +372,16 @@ public abstract class SeleniumTestHandler
 
   /** Is invoked when test or configuration is finished. */
   private void onTestFinish(ITestResult result) {
+    // stop the recording
+    try {
+      screenRecorder.stop();
+    } catch (IOException e) {
+      LOG.error(
+          "Could not stop screen capture for test #{} {}. {}",
+          seleniumTestStatistics.hitStart(),
+          getStartingTestLabel(result.getMethod()),
+          seleniumTestStatistics.toString());
+    }
     // do not treat SeleniumTestHandler error as test failure
     if (testsWithFailure.containsKey(result.getTestClass().getRealClass().getName())
         && testsWithFailure
@@ -660,6 +712,54 @@ public abstract class SeleniumTestHandler
     return format(
         "%s.%s%s",
         test.getInstance().getClass().getSimpleName(), test.getMethodName(), invocationLabel);
+  }
+
+  private void initializeMonteScreenRecorder() {
+    LOG.info("Collecting display devices:");
+    AtomicInteger index = new AtomicInteger(0);
+    SCREENCAP_SCREENS.forEach(
+        graphicsDevice -> {
+          LOG.info(
+              "Screen number {} ID: {} Screen type: {} Device: {}",
+              index.get(),
+              graphicsDevice.getIDstring(),
+              graphicsDevice.getType(),
+              graphicsDevice.toString());
+          index.set(index.get() + 1);
+        });
+    try {
+      screenRecorder =
+          new ScreenRecorder(
+              SCREENCAP_GRAPHICS_CONFIGURATION,
+              SCREENCAP_GRAPHICS_CONFIGURATION.getBounds(),
+              new Format(MediaTypeKey, MediaType.FILE, MimeTypeKey, MIME_AVI),
+              new Format(
+                  MediaTypeKey,
+                  MediaType.VIDEO,
+                  EncodingKey,
+                  ENCODING_AVI_TECHSMITH_SCREEN_CAPTURE,
+                  CompressorNameKey,
+                  ENCODING_AVI_TECHSMITH_SCREEN_CAPTURE,
+                  DepthKey,
+                  SCREENCAP_DEPTH,
+                  FrameRateKey,
+                  SCREENCAP_FRAMERATE,
+                  QualityKey,
+                  SCREENCAP_QUALITY,
+                  KeyFrameIntervalKey,
+                  SCREENCAP_KEYFRAME_INTERVAL),
+              new Format(
+                  MediaTypeKey,
+                  MediaType.VIDEO,
+                  EncodingKey,
+                  "black",
+                  FrameRateKey,
+                  SCREENCAP_FRAMERATE),
+              null,
+              new File(screenshotsDir));
+    } catch (IOException | AWTException e) {
+      LOG.error("Could not initialize monte screen capture.");
+    }
   }
 
   /** Returns list of parent modules */
