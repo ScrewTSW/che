@@ -11,7 +11,9 @@
     "test-happy-path": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-happy-path.opts",
     "test-che-install": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-che-operatorhub.opts",
     "test-wkspc-creation-and-ls": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-wkspc-creation-and-ls.opts",
-    "test-java-vertx": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-java-vertx.opts",
+    "test-devfiles-stable": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-devfiles-stable.opts",
+    "test-devfiles-flaky": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-devfiles-flaky.opts",
+    "test-devfiles-all": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-devfiles-all.opts",
     "lint": "tslint --fix -p .",
     "tsc": "tsc -p ."
   },

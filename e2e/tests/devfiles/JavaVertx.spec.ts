@@ -10,10 +10,9 @@
 import { NameGenerator } from '../../utils/NameGenerator';
 import { TestConstants } from '../../TestConstants';
 import { e2eContainer } from '../../inversify.config';
-import { ICheLoginPage } from '../../pageobjects/login/ICheLoginPage';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { NewWorkspace } from '../../pageobjects/dashboard/NewWorkspace';
-import { CLASSES, TYPES } from '../../inversify.types';
+import { CLASSES } from '../../inversify.types';
 import { Ide } from '../../pageobjects/ide/Ide';
 import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
 import { Editor } from '../../pageobjects/ide/Editor';
@@ -22,8 +21,6 @@ import { QuickOpenContainer } from '../../pageobjects/ide/QuickOpenContainer';
 import { Terminal } from '../../pageobjects/ide/Terminal';
 import 'reflect-metadata';
 import { error, Key } from 'selenium-webdriver';
-import { DriverHelper } from '../../utils/DriverHelper';
-import { ContextMenu } from '../../pageobjects/ide/ContextMenu';
 
 const workspaceName: string = NameGenerator.generate('wksp-test-', 5);
 const namespace: string = TestConstants.TS_SELENIUM_USERNAME;
@@ -32,8 +29,6 @@ const fileFolderPath: string = `${sampleName}/src/main/java/io/vertx/examples/sp
 const tabTitle: string = 'SpringExampleRunner.java';
 const codeNavigationClassName: string = 'ApplicationContext.class';
 
-const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
-const loginPage: ICheLoginPage = e2eContainer.get<ICheLoginPage>(TYPES.CheLogin);
 const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 const newWorkspace: NewWorkspace = e2eContainer.get(CLASSES.NewWorkspace);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
@@ -42,16 +37,8 @@ const editor: Editor = e2eContainer.get(CLASSES.Editor);
 const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
 const quickOpenContainer: QuickOpenContainer = e2eContainer.get(CLASSES.QuickOpenContainer);
 const terminal: Terminal = e2eContainer.get(CLASSES.Terminal);
-const contextMenu: ContextMenu = e2eContainer.get(CLASSES.ContextMenu);
 
 suite('Java Vert.x test', async () => {
-    suite('Login and wait dashboard', async () => {
-        test('Login', async () => {
-            await driverHelper.navigateToUrl(TestConstants.TS_SELENIUM_BASE_URL);
-            await loginPage.login();
-        });
-    });
-
     suite('Create Java Vert.x workspace ' + workspaceName, async () => {
         test('Open \'New Workspace\' page', async () => {
             await newWorkspace.openPageByUI();
@@ -116,15 +103,8 @@ suite('Java Vert.x test', async () => {
 
         test('Codenavigation', async () => {
             await editor.moveCursorToLineAndChar(tabTitle, 17, 15);
-            try {
-                await editor.performKeyCombination(tabTitle, Key.chord(Key.CONTROL, Key.F12));
-                await editor.waitEditorAvailable(codeNavigationClassName);
-            } catch (err) {
-                // workaround for issue: https://github.com/eclipse/che/issues/14520
-                if (err instanceof error.TimeoutError) {
-                    checkCodeNavigationWithContextMenu();
-                }
-            }
+            await editor.performKeyCombination(tabTitle, Key.chord(Key.CONTROL, Key.F12));
+            await editor.waitEditorAvailable(codeNavigationClassName);
         });
 
     });
@@ -167,12 +147,6 @@ suite('Java Vert.x test', async () => {
         }
 
         await quickOpenContainer.clickOnContainerItem(task);
-    }
-
-    async function checkCodeNavigationWithContextMenu() {
-        await contextMenu.invokeContextMenuOnActiveElementWithKeys();
-        await contextMenu.waitContextMenuAndClickOnItem('Go to Definition');
-        console.log('Known isuue https://github.com/eclipse/che/issues/14520.');
     }
 
 });
