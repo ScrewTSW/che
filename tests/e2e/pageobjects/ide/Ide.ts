@@ -266,8 +266,11 @@ export class Ide {
                 const res = await axios.get(url);
                 if (res.status === 200) {
                     return true;
+                } else {
+                    Logger.debug(`Ide.waitApplicationIsReady Axios GET did not return 200 status: ${res.status} ${res.statusText}`);
                 }
             } catch (error) {
+                Logger.debug(`Ide.waitApplicationIsReady Axios call failed with an exception: ${error}`);
                 await this.driverHelper.wait(TestConstants.TS_SELENIUM_DEFAULT_POLLING);
             }
 
