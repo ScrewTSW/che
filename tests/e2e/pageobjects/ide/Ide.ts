@@ -8,6 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 import axios from 'axios';
+import https from 'https';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { injectable, inject } from 'inversify';
 import { CLASSES } from '../../inversify.types';
@@ -263,7 +264,7 @@ export class Ide {
 
         await this.driverHelper.getDriver().wait(async () => {
             try {
-                const res = await axios.get(url);
+                const res = await axios.get(url, { httpsAgent: new https.Agent({ rejectUnauthorized: false }) } );
                 if (res.status === 200) {
                     return true;
                 } else {
