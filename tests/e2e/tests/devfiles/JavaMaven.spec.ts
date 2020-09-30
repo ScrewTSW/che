@@ -9,6 +9,7 @@
  **********************************************************************/
 import 'reflect-metadata';
 import { WorkspaceNameHandler} from '../..';
+import { Key } from 'selenium-webdriver';
 import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
 import * as commonLsTests from '../../testsLibrary/LsTests';
 import * as workspaceHandling from '../../testsLibrary/WorksapceHandlingTests';
@@ -42,7 +43,7 @@ suite(`${stack} test`, async () => {
         commonLsTests.suggestionInvoking(tabTitle, 10, 20, 'append(char c) : PrintStream');
         commonLsTests.errorHighlighting(tabTitle, 'error_text', 11);
         commonLsTests.autocomplete(tabTitle, 10, 11, 'System - java.lang');
-        commonLsTests.codeNavigation(tabTitle, 9, 10, codeNavigationClassName);
+        commonLsTests.codeNavigationGoTo(tabTitle, 9, 10, codeNavigationClassName, Key.chord(Key.CONTROL, Key.F11));
     });
 
     suite ('Stopping and deleting the workspace', async () => {

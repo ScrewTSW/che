@@ -46,7 +46,7 @@ suite(`${stack} test`, async () => {
         commonLsTests.errorHighlighting(tabTitle, `error_text;`, 14);
         commonLsTests.suggestionInvoking(tabTitle, 14, 26, '$test');
         commonLsTests.autocomplete(tabTitle, 15, 5, 'phpinfo');
-        // commonLsTests.codeNavigation(tabTitle, 19, 7, codeNavigationClassName); // there is no codenavigation in the php simple stack (no object oriented code)
+        // commonLsTests.codeNavigationGoTo(tabTitle, 19, 7, codeNavigationClassName); // there is no codenavigation in the php simple stack (no object oriented code)
     });
 
     suite('Validation of project build', async () => {

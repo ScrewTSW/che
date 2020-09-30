@@ -8,6 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 import { WorkspaceNameHandler } from '../..';
+import { Key } from 'selenium-webdriver';
 import 'reflect-metadata';
 import * as codeExecutionHelper from '../../testsLibrary/CodeExecutionTests';
 import * as commonLsTests from '../../testsLibrary/LsTests';
@@ -47,9 +48,9 @@ suite(`${workspaceStack} test`, async () => {
 
     suite(`'Language server validation'`, async () => {
         commonLsTests.errorHighlighting(fileName, 'error text;\n', 17);
-        commonLsTests.suggestionInvoking(fileName, 15, 20, 'require');
+        commonLsTests.suggestionInvoking(fileName, 19, 6, 'res');
         commonLsTests.autocomplete(fileName, 15, 20, 'require');
-        // commonLsTests.codeNavigation(fileName, 19, 10, 'index.d.ts'); // codenavigation is inconsistent https://github.com/eclipse/che/issues/16929
+        commonLsTests.codeNavigationGoTo(fileName, 19, 10, 'index.d.ts', Key.chord(Key.CONTROL, Key.F11));
     });
 
     suite('Stop and remove workspace', async() => {

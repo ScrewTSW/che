@@ -13,12 +13,13 @@ import * as workspaceHandling from '../../testsLibrary/WorksapceHandlingTests';
 import * as commonLsTests from '../../testsLibrary/LsTests';
 import * as codeExecutionTests from '../../testsLibrary/CodeExecutionTests';
 import { WorkspaceNameHandler } from '../..';
+import { Key } from 'selenium-webdriver';
 
 const workspaceSampleName: string = 'vertx-http-example';
 const workspaceRootFolderName: string = 'src';
 const fileFolderPath: string = `${workspaceSampleName}/${workspaceRootFolderName}/main/java/io/openshift/example`;
 const tabTitle: string = 'HttpApplication.java';
-const codeNavigationClassName: string = 'RouterImpl.class';
+const codeNavigationClassName: string = 'Router.class';
 const buildTaskName: string = 'maven build';
 const stack: string = 'Java Vert.x';
 
@@ -42,7 +43,7 @@ suite(`${stack} test`, async () => {
         commonLsTests.errorHighlighting(tabTitle, 'error_text;', 20);
         commonLsTests.suggestionInvoking(tabTitle, 19, 31, 'router(Vertx vertx) : Router');
         commonLsTests.autocomplete(tabTitle, 19, 7, 'Router - io.vertx.ext.web');
-        commonLsTests.codeNavigation(tabTitle, 19, 7, codeNavigationClassName);
+        commonLsTests.codeNavigationGoTo(tabTitle, 19, 31, codeNavigationClassName, Key.chord(Key.CONTROL, Key.F11));
     });
 
     suite ('Stopping and deleting the workspace', async () => {

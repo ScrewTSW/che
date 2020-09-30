@@ -9,6 +9,7 @@
  **********************************************************************/
 import 'reflect-metadata';
 import { WorkspaceNameHandler, Editor, CLASSES } from '../..';
+import { Key } from 'selenium-webdriver';
 import { e2eContainer } from '../../inversify.config';
 import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
 import * as commonLsTests from '../../testsLibrary/LsTests';
@@ -22,6 +23,7 @@ const fileFolderPath: string = `${workspaceSampleName}`;
 const tabTitle: string = 'Program.cs';
 // const codeNavigationClassName: string = '[metadata] Console.cs';
 const stack : string = '.NET Core';
+const codeNavigationClassName : string = 'Console.cs';
 const updateDependenciesTaskName: string = 'update dependencies';
 const buildTaskName: string = 'build';
 const runTaskName: string = 'run';
@@ -51,7 +53,7 @@ suite(`${stack} test`, async () => {
         commonLsTests.suggestionInvoking(tabTitle, 22, 33, 'test');
         commonLsTests.errorHighlighting(tabTitle, 'error_text;', 23);
         commonLsTests.autocomplete(tabTitle, 22, 27, 'WriteLine');
-        // commonLsTests.codeNavigation(tabTitle, 22, 27, codeNavigationClassName); // codenavigation is inconsistent https://github.com/eclipse/che/issues/16929
+        commonLsTests.codeNavigationGoTo(tabTitle, 22, 27, codeNavigationClassName, Key.chord(Key.CONTROL, Key.F11));
     });
 
     suite ('Stopping and deleting the workspace', async () => {

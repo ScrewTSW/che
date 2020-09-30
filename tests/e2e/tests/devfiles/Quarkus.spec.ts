@@ -8,6 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 import { WorkspaceNameHandler } from '../..';
+import { Key } from 'selenium-webdriver';
 import 'reflect-metadata';
 import * as codeExecutionHelper from '../../testsLibrary/CodeExecutionTests';
 import * as commonLsTests from '../../testsLibrary/LsTests';
@@ -51,9 +52,9 @@ suite(`${workspaceStack} test`, async () => {
 
     suite(`'Language server validation'`, async () => {
         commonLsTests.errorHighlighting(fileName, 'error_text;', 7);
-        commonLsTests.suggestionInvoking(fileName, 8, 33, 'String');
+        commonLsTests.suggestionInvoking(fileName, 9, 29, 'name');
         commonLsTests.autocomplete(fileName, 8, 33, 'String');
-        commonLsTests.codeNavigation(fileName, 8, 33, 'String.class');
+        commonLsTests.codeNavigationGoTo(fileName, 8, 33, 'String.class', Key.chord(Key.CONTROL, Key.F11));
     });
 
     suite('Stop and remove workspace', async() => {

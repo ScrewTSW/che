@@ -46,7 +46,7 @@ suite(`${workspaceStack} test`, async () => {
         projectManager.openFile(fileFolderPath, fileName);
     });
 
-    suite('Test golang example', async () => {
+    suite.skip('Test golang example', async () => { // test always fails, because the task does not show a notification about return code
         codeExecutionHelper.runTask(taskTestOutyet, 60_000);
         codeExecutionHelper.closeTerminal(taskTestOutyet);
     });
@@ -57,10 +57,10 @@ suite(`${workspaceStack} test`, async () => {
     });
 
     suite(`'Language server validation'`, async () => {
-        commonLsTests.suggestionInvoking(fileName, 42, 10, 'Parse');
-        commonLsTests.autocomplete(fileName, 42, 10, 'Parse');
+        commonLsTests.suggestionInvoking(fileName, 43, 44, 'baseChangeURL');
+        commonLsTests.autocomplete(fileName, 42, 12, 'Parse');
         commonLsTests.errorHighlighting(fileName, 'error;\n', 42);
-        // commonLsTests.codeNavigation(fileName, 42, 10, 'flag.go'); // codenavigation is inconsistent https://github.com/eclipse/che/issues/16929
+        // commonLsTests.codeNavigationGoTo(fileName, 42, 10, 'flag.go'); // codenavigation is inconsistent https://github.com/eclipse/che/issues/16929
     });
 
     suite('Stop and remove workspace', async() => {
