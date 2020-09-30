@@ -1,5 +1,5 @@
 /*********************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+ * Copyright (c) 2020 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -16,7 +16,7 @@ import { Logger } from '../utils/Logger';
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 
- export function errorHighlighting(openedTab: string, textToWrite: string, line: number) {
+export function errorHighlighting(openedTab: string, textToWrite: string, line: number) {
     test('Error highlighting', async () => {
         await editor.type(openedTab, textToWrite, line);
         try {
@@ -34,9 +34,9 @@ const ide: Ide = e2eContainer.get(CLASSES.Ide);
         }
         await editor.waitErrorInLineDisappearance(line);
     });
- }
+}
 
- export function suggestionInvoking(openedTab: string, line: number, char: number, suggestionText: string) {
+export function suggestionInvoking(openedTab: string, line: number, char: number, suggestionText: string) {
     test('Suggestion invoking', async () => {
         await ide.closeAllNotifications();
         await editor.waitEditorAvailable(openedTab);
@@ -47,37 +47,38 @@ const ide: Ide = e2eContainer.get(CLASSES.Ide);
         await editor.pressControlSpaceCombination(openedTab);
         await editor.waitSuggestion(openedTab, suggestionText);
     });
- }
+}
 
- export function autocomplete(openedTab: string, line: number, char: number, expectedText: string) {
+export function autocomplete(openedTab: string, line: number, char: number, expectedText: string) {
     test('Autocomplete', async () => {
         await editor.moveCursorToLineAndChar(openedTab, line, char);
         await editor.pressControlSpaceCombination(openedTab);
         await editor.waitSuggestionContainer();
         await editor.waitSuggestionWithScrolling(openedTab, expectedText);
     });
- }
+}
 
- export function waitLSInitialization(startingNote: string, startTimeout: number, buildWorkspaceTimeout: number) {
+export function waitLSInitialization(startingNote: string, startTimeout: number, buildWorkspaceTimeout: number) {
     test('LS initialization', async () => {
         await ide.checkLsInitializationStart(startingNote);
         await ide.waitStatusBarTextAbsence(startingNote, startTimeout);
         await ide.waitStatusBarTextAbsence('Building workspace', buildWorkspaceTimeout);
     });
- }
+}
 
- export function codeNavigation(openedFile: string, line: number, char: number, codeNavigationClassName: string) {
-    test('Codenavigation', async () => {
+export function codeNavigationGoTo(openedFile: string, line: number, char: number, codeNavigationClassName: string, keyCombination: string = Key.chord(Key.CONTROL, Key.F12)) {
+    // this method tries to open Definition by default on most devfiles if no keyCombination is passed
+    test('Codenavigation Go To', async () => {
         // adding retry to fix https://github.com/eclipse/che/issues/17411
         try {
             await editor.moveCursorToLineAndChar(openedFile, line, char);
-            await editor.performKeyCombination(openedFile, Key.chord(Key.CONTROL, Key.F12));
+            await editor.performKeyCombination(openedFile, keyCombination);
             await editor.waitEditorAvailable(codeNavigationClassName);
         } catch (err) {
             if (err instanceof error.TimeoutError) {
                 Logger.warn('Code navigation didn\'t work. Trying again.');
                 await editor.moveCursorToLineAndChar(openedFile, line, char);
-                await editor.performKeyCombination(openedFile, Key.chord(Key.CONTROL, Key.F12));
+                await editor.performKeyCombination(openedFile, keyCombination);
                 await editor.waitEditorAvailable(codeNavigationClassName);
             } else {
                 Logger.error('Code navigation didn\'t work even after retrying.');
@@ -85,4 +86,4 @@ const ide: Ide = e2eContainer.get(CLASSES.Ide);
             }
         }
     });
- }
+}
