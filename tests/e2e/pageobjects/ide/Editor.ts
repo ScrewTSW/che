@@ -472,7 +472,7 @@ export class Editor {
     }
 
     private getTabXpathLocator(tabTitle: string): string {
-        return `//li[contains(@class, 'p-TabBar-tab')]//div[text()='${tabTitle}']`;
+        return `//li[contains(@class, 'p-TabBar-tab')]//div[contains(string(),'${tabTitle}')]`;
     }
 
     private async getErrorInLineLocator(lineNumber: number): Promise<By> {

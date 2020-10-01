@@ -21,7 +21,6 @@ const editor: Editor = e2eContainer.get(CLASSES.Editor);
 const workspaceSampleName: string = 'dotnet-web-simple';
 const fileFolderPath: string = `${workspaceSampleName}`;
 const tabTitle: string = 'Program.cs';
-// const codeNavigationClassName: string = '[metadata] Console.cs';
 const stack : string = '.NET Core';
 const codeNavigationClassName : string = 'Console.cs';
 const updateDependenciesTaskName: string = 'update dependencies';
